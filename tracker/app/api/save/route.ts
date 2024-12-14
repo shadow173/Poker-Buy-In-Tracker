@@ -1,5 +1,5 @@
+// app/api/save/route.ts
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 type BuyIn = {
   amount: number;
@@ -17,16 +17,21 @@ type StoredData = {
   globalBuyInSet: boolean;
 };
 
-const database = new Map<string, StoredData>(); // In-memory storage
+// Use const instead of exporting the database directly
+const database = new Map<string, StoredData>();
 
 export async function POST(request: Request) {
-  const { players, initialBuyIn, globalBuyInSet } = await request.json();
-
-  const id = crypto.randomBytes(4).toString('hex');
-  database.set(id, { players, initialBuyIn, globalBuyInSet });
-
-  return NextResponse.json({ id });
+  try {
+    const body = await request.json();
+    const id = Math.random().toString(36).substring(7);
+    
+    database.set(id, body);
+    
+    return NextResponse.json({ id }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to save data' },
+      { status: 500 }
+    );
+  }
 }
-
-// For demonstration, we also need to export the database so load can access it (or we can copy the variable there as well).
-export { database };

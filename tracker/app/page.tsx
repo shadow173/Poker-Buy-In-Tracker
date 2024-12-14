@@ -15,15 +15,13 @@ import {
   Group,
   Modal,
   NumberInput,
-  Paper,
   Select,
   Table,
   Text,
   TextInput,
   Title,
-  Tooltip,
 } from '@mantine/core';
-import { IconSun, IconMoonStars, IconPlus, IconEdit, IconTrash, IconLink } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconLink } from '@tabler/icons-react';
 
 type BuyIn = {
   amount: number;
@@ -51,16 +49,19 @@ export default function HomePage() {
     method: string;
     customMethod: string;
   } | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   const [quickAddPlayerIndex, setQuickAddPlayerIndex] = useState<number | null>(null);
   const [quickAddMethod, setQuickAddMethod] = useState(paymentMethods[0]);
   const [quickAddCustomMethod, setQuickAddCustomMethod] = useState('');
   const [isClient, setIsClient] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [showShareModal, setShowShareModal] = useState(false);
   useEffect(() => {
     setIsMounted(true);
+    if(isMounted){
+      
+    }
   }, []);
   useEffect(() => {
     setIsClient(true);
@@ -117,10 +118,11 @@ export default function HomePage() {
 
   const startEditBuyIn = (playerIndex: number, buyInIndex: number) => {
     const buyIn = players[playerIndex].buyIns[buyInIndex];
-    let method = paymentMethods.includes(buyIn.method) ? buyIn.method : 'Custom';
-    let customMethod = !paymentMethods.includes(buyIn.method) ? buyIn.method : '';
+    const method = paymentMethods.includes(buyIn.method) ? buyIn.method : 'Custom';
+    const customMethod = !paymentMethods.includes(buyIn.method) ? buyIn.method : '';
     setEditingBuyIn({ playerIndex, buyInIndex, amount: buyIn.amount, method, customMethod });
   };
+  
 
   const saveEditBuyIn = () => {
     if (!editingBuyIn) return;
@@ -205,8 +207,8 @@ export default function HomePage() {
     if (value <= 1) {
       let closest = 0.1;
       let minDiff = Math.abs(value - 0.1);
-      for (let denom of allowedDenominations) {
-        let diff = Math.abs(value - denom);
+      for (const denom of allowedDenominations) {
+        const diff = Math.abs(value - denom);
         if (diff < minDiff) {
           minDiff = diff;
           closest = denom;
@@ -570,7 +572,7 @@ function EditBuyInForm({
   amount: number;
   method: string;
   customMethod: string;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | number) => void;  // More specific type than any
   onSave: () => void;
   onCancel: () => void;
 }) {
@@ -610,34 +612,4 @@ function EditBuyInForm({
   );
 }
 
-function DarkModeToggle() {
-  if (typeof window === 'undefined') return null; // Just for SSR safety
 
-  const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light');
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark' || saved === 'light') {
-      setColorScheme(saved);
-    }
-  }, []);
-
-  const toggle = () => {
-    const next = colorScheme === 'light' ? 'dark' : 'light';
-    setColorScheme(next);
-    localStorage.setItem('theme', next);
-    const event = new Event('toggle-color-scheme');
-    document.dispatchEvent(event);
-  };
-
-  return (
-    <Tooltip label="Toggle theme" withArrow position="bottom">
-      <ActionIcon variant="outline" color={colorScheme === 'light' ? 'dark' : 'yellow'} onClick={toggle}>
-        {colorScheme === 'light' ? <IconSun size="1.1rem" /> : <IconMoonStars size="1.1rem" />}
-      </ActionIcon>
-    </Tooltip>
-  );
-}
